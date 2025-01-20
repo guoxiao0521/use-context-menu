@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import {createApp, h, ref} from "vue";
-import ContextMenu from "@/components/contextmenu/ContextMenu.vue";
-import {useEventListener} from "@vueuse/core";
+import {ref} from "vue";
+import {IMenuItem, useContextMenu} from "@/composables/useContextMenu.ts";
 
-// 菜单数据
-const menuItems = ref([
+const menuItems = ref<IMenuItem[]>([
     {
         label: '新建',
         children: [
@@ -23,59 +21,23 @@ const menuItems = ref([
     { label: '删除', action: 'delete' },
     { label: '刷新', action: 'refresh' }
 ])
-const visible = ref(true)
-const _app = ref()
-const useContextMenu = (e: MouseEvent) => {
-    e.preventDefault();
-    const unmount = () => {
-        if (_app.value) {
-            _app.value.unmount();
-            _app.value = null;
-        }
-    }
-    return new Promise((resolve, reject) => {
-        if (_app.value) {
-            unmount();
-        }
-        const container = document.createElement('div');
-        document.body.appendChild(container);
-        const com = h(
-            ContextMenu,
-            {
-                visible: visible.value,
-                menuItems: menuItems.value,
-                position: { x: e.x, y: e.y },
-                onSelect: (item) => {
-                    resolve(item)
-                    container.remove();
-                    unmount();
-                },
-                onClose: () => {
-                    container.remove();
-                    unmount();
-                    reject();
-                }
-            },
-        )
-        _app.value = createApp(com);
-        _app.value?.mount?.(container);
-    })
-}
-const wrapper = ref()
+const handleEl = ref()
 
-useEventListener('contextmenu', async (e) => {
-    try {
-        const r = await useContextMenu(e);
-        console.log(r)
-    } catch (e) {
-        console.error('cancel select')
+useContextMenu({
+    menuItems,
+    handleEl,
+    onSelect: (item) => {
+        console.log(item)
+    },
+    onClose: () => {
+        console.log('close')
     }
 })
 
 </script>
 
 <template>
-  <div class="w-full h-full" ref="wrapper">
+  <div class="h-dvh w-dvw" ref="handleEl">
 
   </div>
 

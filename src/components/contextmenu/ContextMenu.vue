@@ -24,23 +24,17 @@
     </div>
 </template>
 
-<script setup>
-import {ref, defineProps, defineEmits, onBeforeUnmount} from 'vue'
+<script setup lang="ts">
+import {onBeforeUnmount, ref} from 'vue'
 import {onClickOutside} from "@vueuse/core";
+import {IMenuItem} from "@/composables/useContextMenu.ts";
 
-const props = defineProps({
-    visible: {
-        type: Boolean,
-        default: false
-    },
-    menuItems: {
-        type: Array,
-        default: () => []
-    },
-    position: {
-        type: Object,
-        default: () => ({ x: 0, y: 0 })
-    }
+const props = withDefaults(defineProps<{
+    visible?: boolean | undefined;
+    menuItems: IMenuItem[];
+    position: { x: number; y: number };
+}>(), {
+    menuItems: () => []
 })
 const contextMenuRef = ref();
 
@@ -48,14 +42,14 @@ const emit = defineEmits(['select', 'close'])
 const subMenuPosition = ref({ x: 0, y: 0 })
 
 // 处理菜单项点击
-const handleItemClick = (item) => {
+const handleItemClick = (item: IMenuItem) => {
     if (!item.children && item.action) {
         emit('select', item)
     }
 }
 
 // 处理鼠标悬停显示子菜单
-const handleMouseEnter = (event, item) => {
+const handleMouseEnter = (event: any, item: IMenuItem) => {
     // 重置所有菜单项的子菜单显示状态
     props.menuItems.forEach(i => {
         if (i !== item) {
@@ -75,12 +69,12 @@ const handleMouseEnter = (event, item) => {
 }
 
 // 处理子菜单选择
-const handleSelect = (item) => {
+const handleSelect = (item: IMenuItem) => {
     emit('select', item)
 }
 
 // 递归将菜单项的子菜单显示状态重置为false
-const resetSubMenuVisibility = (items) => {
+const resetSubMenuVisibility = (items: IMenuItem[]) => {
     items.forEach(item => {
         item.showSubMenu = false
         if (item.children) {

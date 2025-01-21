@@ -1,13 +1,17 @@
 <template>
-    <div v-show="visible"
-         class="context-menu"
-         ref="contextMenuRef"
-         :style="{ top: position.y + 'px', left: position.x + 'px' }">
-        <div v-for="(item, index) in menuItems"
-             :key="index"
-             class="menu-item"
-             @click="handleItemClick(item)"
-             @mouseenter="handleMouseEnter($event, item)">
+    <div
+        v-show="visible"
+        ref="contextMenuRef"
+        class="context-menu"
+        :style="{ top: position.y + 'px', left: position.x + 'px' }"
+    >
+        <div
+            v-for="(item, index) in menuItems"
+            :key="index"
+            class="menu-item"
+            @click="handleItemClick(item)"
+            @mouseenter="handleMouseEnter($event, item)"
+        >
             <span>{{ item.label }}</span>
             <span v-if="item.children" class="arrow">▶</span>
 
@@ -25,69 +29,75 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, ref} from 'vue'
-import {onClickOutside} from "@vueuse/core";
-import {IMenuItem} from "@/composables/useContextMenu.ts";
+import { onBeforeUnmount, ref } from 'vue';
+import { onClickOutside } from '@vueuse/core';
+import { IMenuItem } from '@/composables/useContextMenu.ts';
 
-const props = withDefaults(defineProps<{
-    visible?: boolean | undefined;
-    menuItems: IMenuItem[];
-    position: { x: number; y: number };
-}>(), {
-    menuItems: () => []
-})
+const props = withDefaults(
+    defineProps<{
+        visible?: boolean;
+        menuItems: IMenuItem[];
+        position: { x: number; y: number };
+    }>(),
+    {
+        menuItems: () => [],
+    }
+);
 const contextMenuRef = ref();
 
-const emit = defineEmits(['select', 'close'])
-const subMenuPosition = ref({ x: 0, y: 0 })
+const emit = defineEmits(['select', 'close']);
+const subMenuPosition = ref({ x: 0, y: 0 });
 
 // 处理菜单项点击
 const handleItemClick = (item: IMenuItem) => {
     if (!item.children && item.action) {
-        emit('select', item)
+        emit('select', item);
     }
-}
+};
 
 // 处理鼠标悬停显示子菜单
-const handleMouseEnter = (event: any, item: IMenuItem) => {
+const handleMouseEnter = (event: MouseEvent, item: IMenuItem) => {
     // 重置所有菜单项的子菜单显示状态
-    props.menuItems.forEach(i => {
+    props.menuItems.forEach((i) => {
         if (i !== item) {
-            i.showSubMenu = false
+            i.showSubMenu = false;
         }
-    })
+    });
 
     if (item.children) {
-        item.showSubMenu = true
+        item.showSubMenu = true;
         // 计算子菜单位置
-        const rect = event.target.getBoundingClientRect()
+        const rect = event?.target?.getBoundingClientRect?.();
+        if (!rect) {
+            return;
+        }
         subMenuPosition.value = {
             x: rect.width,
-            y: 0
-        }
+            y: 0,
+        };
     }
-}
+};
 
 // 处理子菜单选择
 const handleSelect = (item: IMenuItem) => {
-    emit('select', item)
-}
+    emit('select', item);
+};
 
 // 递归将菜单项的子菜单显示状态重置为false
 const resetSubMenuVisibility = (items: IMenuItem[]) => {
-    items.forEach(item => {
-        item.showSubMenu = false
+    items.forEach((item) => {
+        item.showSubMenu = false;
         if (item.children) {
-            resetSubMenuVisibility(item.children)
+            resetSubMenuVisibility(item.children);
         }
-    })
-}
+    });
+};
 onClickOutside(contextMenuRef, () => {
-    emit('close')
-})
+    emit('close');
+});
 onBeforeUnmount(() => {
-    resetSubMenuVisibility(props.menuItems)
-})
+    resetSubMenuVisibility(props.menuItems);
+});
 </script>
 
 <style scoped>

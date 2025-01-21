@@ -1,6 +1,6 @@
-import {defineConfig} from 'vite';
-import {resolve} from 'path';
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
+import vue from '@vitejs/plugin-vue';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
@@ -29,12 +29,12 @@ export default defineConfig({
             rollupTypes: true,
             insertTypesEntry: true,
             copyDtsFiles: true,
-            include: ['src/**/*.ts', 'src/**/*.vue', 'src/index.ts']
-        })
+            include: ['src/**/*.ts', 'src/**/*.vue', 'src/index.ts'],
+        }),
     ],
     resolve: {
-      alias: {
-        '@': resolve(__dirname, 'src'),
-      }
-    }
+        alias: {
+            '@': resolve(__dirname, 'src'),
+        },
+    },
 });
